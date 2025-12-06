@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+instance/
+.env
+venv/
+media/uploads/*
+media/audio/*
+media/cache/*
+media/outputs/*
+!media/uploads/.gitkeep  # Keeps the folder structure but ignores files

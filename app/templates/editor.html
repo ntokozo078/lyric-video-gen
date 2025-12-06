@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-3">
+    
+    <div class="row mb-3">
+        <div class="col-12 bg-dark p-3 rounded d-flex align-items-center gap-2 flex-wrap">
+            <select id="style-selector" class="form-select form-select-sm w-auto">
+                <option value="style-clean">Clean White</option>
+                <option value="style-ig-glow">IG Glow 💧</option>
+                <option value="style-ig-green">IG Neon 🐍</option>
+                <option value="style-emoji">Emoji Mode 😜</option>
+            </select>
+
+            <select id="pos-selector" class="form-select form-select-sm w-auto">
+                <option value="pos-top">Top</option>
+                <option value="pos-center">Center</option>
+                <option value="pos-bottom" selected>Bottom</option>
+            </select>
+
+            <select id="anim-selector" class="form-select form-select-sm w-auto">
+                <option value="anim-none">No Anim</option>
+                <option value="anim-pop">Pop In 💥</option>
+                <option value="anim-slide">Slide Up ⬆️</option>
+                <option value="anim-bounce">Bounce 🏀</option>
+                <option value="anim-karaoke">Karaoke 🎤</option>
+            </select>
+
+            <div class="input-group input-group-sm w-auto ms-auto">
+                <select id="lang-selector" class="form-select bg-secondary text-white border-0">
+    <option value="en">English 🇺🇸</option> <option value="zu">Zulu 🇿🇦</option>
+    <option value="fr">French 🇫🇷</option>
+    <option value="es">Spanish 🇪🇸</option>
+</select>
+                <button id="translate-btn" class="btn btn-info fw-bold">Translate</button>
+            </div>
+
+            <button id="render-btn" class="btn btn-primary btn-sm fw-bold">Export Video</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-lg border-0 bg-black">
+                
+                <div class="card-body bg-black p-4 d-flex justify-content-center align-items-center" style="min-height: 500px;">
+                    
+                    <div class="video-wrapper">
+                        <video id="main-video" controls>
+                            <source src="{{ url_for('main.serve_media', filename='uploads/' + filename) }}" type="video/mp4">
+                        </video>
+
+                        <div id="lyric-overlay" class="pos-bottom">
+                            <h2 id="current-lyric" class="style-clean px-3 text-center transition-all">...</h2>
+                        </div>
+                    </div>
+
+                </div>
+                
+                <div id="progress-container" class="card-footer bg-dark border-0 d-none">
+                    <small class="text-white mb-1 d-block">Rendering Status: <span id="progress-status" class="text-warning">Waiting...</span></small>
+                    <div class="progress" style="height: 6px;">
+                        <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between">
+                    <span>Lyrics Editor</span>
+                    <button id="save-btn" class="btn btn-sm btn-success">Save Changes</button>
+                </div>
+                <div class="card-body p-0" style="overflow-y: scroll; height: 500px;">
+                    <div id="transcript-list" class="list-group list-group-flush"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // --- ELEMENT REFERENCES ---
+    const video = document.getElementById("main-video");
+    const overlay = document.getElementById("lyric-overlay"); // The container
+    const lyricDisplay = document.getElementById("current-lyric"); // The text
+    const transcriptList = document.getElementById("transcript-list");
+    
+    // Controls
+    const styleSelector = document.getElementById("style-selector");
+    const posSelector = document.getElementById("pos-selector");
+    const animSelector = document.getElementById("anim-selector");
+    
+    // Config Data
+    let lyricData = [];
+    const filename = "{{ filename }}";
+    
+    // --- 1. LOAD DATA ---
+    fetch("{{ url_for('main.get_data', filename=filename) }}")
+        .then(res => res.json())
+        .then(data => { lyricData = data.segments; renderList(); });
+
+    // --- 2. VIDEO SYNC ---
+    video.addEventListener("timeupdate", () => {
+        const t = video.currentTime;
+        const seg = lyricData.find(s => t >= s.start && t <= s.end);
+        if (seg) {
+            lyricDisplay.innerText = seg.word;
+            lyricDisplay.style.opacity = 1;
+        } else {
+            lyricDisplay.innerText = "";
+        }
+    });
+
+    // --- 3. UI UPDATERS (Style, Pos, Anim) ---
+    function updateClasses() {
+        // A. Reset & Apply Text Style
+        lyricDisplay.className = "px-3 text-center transition-all"; 
+        lyricDisplay.classList.add(styleSelector.value);
+        if (animSelector.value !== 'anim-none') {
+            lyricDisplay.classList.add(animSelector.value);
+        }
+        
+        // B. Reset & Apply Position (to Container)
+        overlay.className = ""; // Wipe previous classes
+        overlay.classList.add(posSelector.value); // Add new position class
+    }
+
+    // Attach listeners
+    styleSelector.addEventListener("change", updateClasses);
+    posSelector.addEventListener("change", updateClasses);
+    animSelector.addEventListener("change", updateClasses);
+
+    // Initial run
+    updateClasses();
+
+
+    // --- 4. TRANSLATION LOGIC ---
+    document.getElementById("translate-btn").addEventListener("click", () => {
+        const btn = document.getElementById("translate-btn");
+        btn.innerText = "Translating...";
+        btn.disabled = true;
+        
+        const lang = document.getElementById("lang-selector").value;
+        
+        fetch(`/translate/${filename}`, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ lang: lang })
+        })
+        .then(res => res.json())
+        .then(data => {
+            lyricData = data.segments;
+            renderList(); // Refresh sidebar with new language
+            btn.innerText = "Translate";
+            btn.disabled = false;
+        });
+    });
+
+    // --- 5. ASYNC RENDER LOGIC ---
+    document.getElementById("render-btn").addEventListener("click", () => {
+        const btn = document.getElementById("render-btn");
+        btn.disabled = true;
+        
+        // Show Progress Bar
+        document.getElementById("progress-container").classList.remove("d-none");
+        
+        // Note: We use the dropdown value for position now, not drag coordinates
+        // to ensure it matches the preview exactly.
+        const selectedPos = document.getElementById("pos-selector").value;
+        
+        fetch("/render", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                filename: filename,
+                style: document.getElementById("style-selector").value,
+                animation: document.getElementById("anim-selector").value,
+                position: selectedPos 
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            // Start Polling
+            checkStatus(data.task_id);
+        });
+    });
+
+    function checkStatus(taskId) {
+        fetch(`/status/${taskId}`)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("progress-status").innerText = data.status;
+                
+                if (data.state === 'SUCCESS') {
+                    document.getElementById("render-btn").disabled = false;
+                    document.getElementById("progress-container").classList.add("d-none");
+                    window.location.href = data.download_url; // Auto download
+                } else if (data.state === 'FAILURE') {
+                    alert("Error: " + data.status);
+                    document.getElementById("render-btn").disabled = false;
+                } else {
+                    // Check again in 2 seconds
+                    setTimeout(() => checkStatus(taskId), 2000);
+                }
+            });
+    }
+
+    // --- HELPER: RENDER LIST ---
+    function renderList() {
+        transcriptList.innerHTML = "";
+        lyricData.forEach((seg, i) => {
+            const div = document.createElement("div");
+            div.className = "list-group-item p-2 d-flex align-items-center";
+            div.innerHTML = `
+                <span class="badge bg-light text-dark me-2" style="cursor:pointer">${seg.start.toFixed(1)}s</span>
+                <input class="form-control border-0 fw-bold" value="${seg.word}">
+            `;
+            // Sync Input -> Data
+            div.querySelector("input").oninput = (e) => lyricData[i].word = e.target.value;
+            // Sync Badge -> Video Jump
+            div.querySelector(".badge").onclick = () => { video.currentTime = seg.start; video.play(); };
+            
+            transcriptList.appendChild(div);
+        });
+    }
+
+    // --- SAVE BUTTON ---
+    document.getElementById("save-btn").addEventListener("click", function() {
+        fetch("{{ url_for('main.update_data', filename=filename) }}", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ segments: lyricData })
+        })
+        .then(res => res.json())
+        .then(data => alert("Changes Saved!"));
+    });
+});
+</script>
+{% endblock %}

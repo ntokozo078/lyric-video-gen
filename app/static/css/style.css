@@ -1,0 +1,343 @@
+/* 1. Default Style (Clean White) */
+.style-default {
+    font-family: Arial, sans-serif;
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px #000;
+    background: rgba(0,0,0,0.5);
+    padding: 10px 20px;
+    border-radius: 8px;
+}
+
+/* 2. Neon Style (Glowing Pink/Blue) */
+.style-neon {
+    font-family: 'Courier New', monospace;
+    color: #fff;
+    font-size: 28px;
+    text-transform: uppercase;
+    text-shadow: 
+        0 0 5px #fff,
+        0 0 10px #fff,
+        0 0 20px #ff00de,
+        0 0 40px #ff00de;
+    background: transparent;
+    padding: 10px;
+}
+
+/* 3. Karaoke (Yellow with Outline) */
+.style-karaoke {
+    font-family: 'Impact', sans-serif;
+    color: #FFD700; /* Gold */
+    font-size: 32px;
+    letter-spacing: 2px;
+    -webkit-text-stroke: 1px black; /* Black outline */
+    background: transparent;
+    text-shadow: 3px 3px 0 #000;
+}
+
+/* 4. Minimalist (Black Bar) */
+.style-minimal {
+    font-family: 'Helvetica', sans-serif;
+    color: black;
+    background: white;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 5px 15px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border-radius: 0;
+}
+/* GLOBAL LAYOUT FIXES */
+.video-container {
+    position: relative;
+    background: black;
+    overflow: hidden;
+}
+
+/* Ensure the overlay sits ON TOP of video but BELOW the controls */
+#lyric-overlay {
+    pointer-events: none; /* Crucial: Lets you click "through" the text to pause/play video */
+    z-index: 10;
+}
+
+/* 1. "Feelings" Style (Blue Neon Glow) - Matches Image 1 */
+.style-neon-blue {
+    font-family: 'Poppins', sans-serif; /* Modern, round font */
+    font-weight: 800;
+    font-size: 36px;
+    color: white;
+    text-shadow: 
+        0 0 5px #00d2ff,
+        0 0 15px #00d2ff,
+        0 0 30px #00d2ff;
+    transition: all 0.2s ease;
+}
+
+/* 2. "Am I High?" Style (Green Highlight) - Matches Image 2 */
+.style-green-highlight {
+    font-family: 'Arial', sans-serif;
+    font-weight: bold;
+    font-size: 32px;
+    color: #39ff14; /* Bright Neon Green */
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    background: rgba(0,0,0,0.6); /* Semi-transparent box behind text */
+    padding: 5px 15px;
+    border-radius: 8px;
+}
+
+/* 3. The "Emoji" Style (Fun & Bouncy) */
+.style-emoji {
+    font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+    font-weight: bold;
+    font-size: 40px;
+    color: #ffcc00; /* Yellow */
+    text-shadow: 2px 2px 0px #000;
+    animation: bounce 0.5s infinite alternate;
+}
+
+@keyframes bounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-5px); }
+}
+
+/* 4. Default Clean */
+.style-clean {
+    font-family: sans-serif;
+    color: white;
+    font-size: 24px;
+    text-shadow: 1px 1px 2px black;
+}
+/* ... keep your existing generic styles ... */
+
+/* IG STYLE 1: "All My Feelings" (Blue/White Glow) */
+/* Matches your uploaded Image 1 */
+.style-ig-glow {
+    font-family: 'Georgia', 'Times New Roman', serif; /* IG uses Serif for this style */
+    font-style: italic;
+    font-weight: bold;
+    font-size: 38px;
+    color: white;
+    text-shadow: 
+        0 0 10px #00d2ff,
+        0 0 20px #00d2ff,
+        0 0 40px #00d2ff; /* Strong Blue Glow */
+    transition: all 0.2s ease;
+}
+
+/* IG STYLE 2: "Am I High?" (Green/Neon) */
+/* Matches your uploaded Image 3 */
+.style-ig-green {
+    font-family: 'Arial', sans-serif;
+    font-weight: 900;
+    font-size: 42px;
+    color: #39ff14; /* The standard Neon Green */
+    text-shadow: 
+        0 0 5px black, 
+        0 0 15px #39ff14; /* Green glow around the text */
+    text-transform: uppercase;
+    background: rgba(0,0,0,0.3); /* Slight darkness behind text to pop */
+    padding: 5px 15px;
+    border-radius: 5px;
+}
+/* --- POSITIONS --- */
+.pos-top { bottom: auto !important; top: 10% !important; }
+.pos-center { bottom: auto !important; top: 50% !important; transform: translateY(-50%) !important; }
+.pos-bottom { top: auto !important; bottom: 15% !important; }
+
+/* --- ANIMATIONS --- */
+
+/* 1. Pop In (Scale Up) */
+@keyframes popIn {
+    0% { transform: scale(0); opacity: 0; }
+    80% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); }
+}
+.anim-pop { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+/* 2. Slide Up */
+@keyframes slideUp {
+    from { transform: translateY(50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+.anim-slide { animation: slideUp 0.4s ease-out forwards; }
+
+/* 3. Bounce (Continuous) */
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+.anim-bounce { animation: popIn 0.2s, bounce 1s infinite; }
+
+/* 4. Typewriter (Blinking Cursor Effect) */
+.anim-typewriter {
+    border-right: 2px solid white;
+    animation: blink 0.7s steps(1) infinite;
+}
+@keyframes blink { 50% { border-color: transparent; } }
+
+/* 5. Karaoke (Active Word Highlight) */
+.active-word {
+    color: #ff00de; /* Hot Pink Highlighting */
+    text-shadow: 0 0 10px #ff00de;
+    transform: scale(1.1);
+    display: inline-block;
+}
+/* CONTAINER: Ensure it sits exactly on top of the video */
+#lyric-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    display: flex; /* Flexbox is the secret to perfect centering */
+    flex-direction: column;
+}
+
+/* --- POSITIONS (Controlled via Flexbox) --- */
+/* Top: Items start at top */
+.pos-top { justify-content: flex-start; padding-top: 10%; }
+
+/* Center: Items sit in the middle */
+.pos-center { justify-content: center; }
+
+/* Bottom: Items sit at the bottom */
+.pos-bottom { justify-content: flex-end; padding-bottom: 15%; }
+
+/* --- ANIMATIONS --- */
+
+/* 1. Pop In */
+@keyframes popIn {
+    0% { transform: scale(0); opacity: 0; }
+    80% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); }
+}
+.anim-pop { animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+/* 2. Slide Up (Smoother) */
+@keyframes slideUp {
+    from { transform: translateY(40px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+.anim-slide { animation: slideUp 0.3s ease-out forwards; }
+
+/* 3. Bounce */
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-20px); }
+    60% { transform: translateY(-10px); }
+}
+.anim-bounce { animation: bounce 0.6s ease; }
+
+/* 4. Typing (Clean - No Line) */
+@keyframes typingFade {
+    from { width: 0; opacity: 0; }
+    to { width: 100%; opacity: 1; }
+}
+.anim-typewriter {
+    overflow: hidden;
+    white-space: nowrap;
+    animation: typingFade 0.1s steps(10) forwards;
+}
+
+/* 5. Karaoke (Gold Pop) */
+@keyframes karaokePop {
+    0% { transform: scale(1); color: white; }
+    50% { transform: scale(1.3); color: #FFD700; text-shadow: 0 0 20px #FFD700; }
+    100% { transform: scale(1); color: white; }
+}
+.anim-karaoke { animation: karaokePop 0.4s ease-out forwards; }
+
+/* --- STYLES --- */
+.style-clean { color: white; font-family: Arial; font-weight: bold; font-size: 32px; text-shadow: 2px 2px 4px #000; }
+.style-ig-glow { color: white; font-family: 'Times New Roman'; font-style: italic; font-size: 40px; text-shadow: 0 0 10px #00d2ff, 0 0 20px #00d2ff; }
+.style-ig-green { color: #39ff14; font-family: 'Arial Black'; font-weight: 900; font-size: 42px; text-shadow: 2px 2px 0 #000; background: rgba(0,0,0,0.5); padding: 5px 15px; }
+.style-emoji { font-size: 60px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+/* --- LAYOUT FIXES --- */
+/* 1. Constrain the video container so it doesn't blow up on laptops */
+.video-wrapper {
+    position: relative;
+    display: inline-block; /* Shrink to fit the video size */
+    background: black;
+    max-height: 75vh; /* Never taller than 75% of the screen */
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+/* 2. The Video itself */
+#main-video {
+    max-height: 75vh; /* Match wrapper */
+    width: auto;      /* Let width adjust automatically */
+    max-width: 100%;  /* Don't overflow width */
+    display: block;
+}
+
+/* 3. The Overlay (Lyrics) */
+#lyric-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Let clicks pass through to video */
+    z-index: 10;
+    
+    /* Flexbox Engine */
+    display: flex;
+    flex-direction: column;
+    /* Horizontal Center by default */
+    align-items: center; 
+}
+
+/* --- POSITIONS (Vertical Control) --- */
+.pos-top { 
+    justify-content: flex-start; 
+    padding-top: 10%; 
+}
+
+.pos-center { 
+    justify-content: center; 
+    padding: 0; 
+}
+
+.pos-bottom { 
+    justify-content: flex-end; 
+    padding-bottom: 15%; 
+}
+
+
+/* --- ANIMATIONS (Keep your existing ones) --- */
+@keyframes popIn {
+    0% { transform: scale(0); opacity: 0; }
+    80% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); }
+}
+.anim-pop { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+@keyframes slideUp {
+    from { transform: translateY(40px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+.anim-slide { animation: slideUp 0.4s ease-out forwards; }
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-20px); }
+    60% { transform: translateY(-10px); }
+}
+.anim-bounce { animation: bounce 0.6s ease; }
+
+@keyframes karaokePop {
+    0% { transform: scale(1); color: white; }
+    50% { transform: scale(1.3); color: #FFD700; text-shadow: 0 0 20px #FFD700; }
+    100% { transform: scale(1); color: white; }
+}
+.anim-karaoke { animation: karaokePop 0.4s ease-out forwards; }
+
+/* --- TEXT STYLES --- */
+.style-clean { color: white; font-family: Arial; font-weight: bold; font-size: 28px; text-shadow: 2px 2px 4px #000; }
+.style-ig-glow { color: white; font-family: 'Times New Roman'; font-style: italic; font-size: 32px; text-shadow: 0 0 10px #00d2ff, 0 0 20px #00d2ff; }
+.style-ig-green { color: #39ff14; font-family: 'Arial Black'; font-weight: 900; font-size: 34px; text-shadow: 2px 2px 0 #000; background: rgba(0,0,0,0.5); padding: 5px 15px; }
+.style-emoji { font-size: 50px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
