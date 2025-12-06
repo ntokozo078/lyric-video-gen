@@ -2,15 +2,16 @@
 FROM python:3.9-slim
 
 # 2. Install System Dependencies (FFmpeg, ImageMagick, Redis)
+# We also install 'findutils' to help locate the policy file dynamically
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     imagemagick \
     redis-server \
     && rm -rf /var/lib/apt/lists/*
 
-# 3. Fix ImageMagick Policy (Allow it to write text)
-# By default, some Linux versions block ImageMagick from writing text for security. We unlock it.
-RUN sed -i 's/none/read,write/g' /etc/ImageMagick-6/policy.xml
+# 3. Fix ImageMagick Policy (CRITICAL FIX)
+# This command looks for ANY ImageMagick policy file (version 6 or 7) and unlocks it.
+RUN sed -i 's/none/read,write/g' /etc/ImageMagick-*/policy.xml
 
 # 4. Set working directory
 WORKDIR /app
@@ -25,7 +26,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 5000
 
 # 8. Start the App (Run Redis + Celery + Flask)
-# We use a shell script to start everything together
 CMD redis-server --daemonize yes && \
     celery -A app.tasks.celery worker --loglevel=info --pool=gevent --concurrency=4 & \
     gunicorn --bind 0.0.0.0:5000 run:app
