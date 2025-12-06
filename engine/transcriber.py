@@ -4,6 +4,9 @@ import warnings
 # Suppress annoying warnings from the libraries
 warnings.filterwarnings("ignore")
 
+# GLOBAL VARIABLE: Start as None so we don't load it immediately
+model = None
+
 def transcribe_audio(audio_path, model_size="base"):
     """
     Uses OpenAI Whisper to convert audio to text with word-level timestamps.
@@ -16,10 +19,18 @@ def transcribe_audio(audio_path, model_size="base"):
     Returns:
         dict: A structured dictionary containing full text and word segments.
     """
-    print(f"Loading Whisper model: {model_size}...")
-    model = whisper.load_model(model_size)
+    global model
+
+    # LAZY LOADING PATTERN
+    # Check if the model is already loaded. If not, load it now.
+    if model is None:
+        print(f"⏳ Loading Whisper model: {model_size} (This happens only once)...")
+        model = whisper.load_model(model_size)
+    else:
+        print("⚡ Model already loaded. Skipping setup.")
     
     print("Transcribing audio... this may take a moment.")
+    
     # word_timestamps=True is CRITICAL for karaoke effects
     result = model.transcribe(audio_path, word_timestamps=True)
     
