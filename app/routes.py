@@ -114,4 +114,12 @@ def serve_media(filename):
 
 @main.route('/download/<filename>')
 def download_file(filename):
-    return send_from_directory(current_app.config['OUTPUT_FOLDER'], filename, as_attachment=True)
+    try:
+        return send_from_directory(
+            current_app.config['OUTPUT_FOLDER'], 
+            filename, 
+            as_attachment=True, # Forces "Save As" popup
+            download_name=filename
+        )
+    except FileNotFoundError:
+        return "File not found (Render might have deleted it to save space). Try exporting again.", 404
