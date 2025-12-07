@@ -7,50 +7,45 @@ warnings.filterwarnings("ignore")
 
 def transcribe_audio(audio_path, model_size="tiny"):
     """
-    Ultra-Low Memory Version for Free Tier Hosting.
+    Uses Faster-Whisper (CTranslate2) to save RAM.
+    This runs without PyTorch, using ~200MB RAM instead of ~600MB.
     """
-    # 1. Force PyTorch to use minimal threads (Saves RAM)
-    os.environ["OMP_NUM_THREADS"] = "1"
-    os.environ["MKL_NUM_THREADS"] = "1"
-    os.environ["OPENBLAS_NUM_THREADS"] = "1"
+    print(f"⚡ Starting transcription (Faster-Whisper / {model_size})...")
+    
+    # 1. Local Import to save start-up memory
+    from faster_whisper import WhisperModel
 
-    print("⚡ Starting transcription (Low RAM Mode)...")
-    
-    # 2. Local Imports (Only load heavy libraries NOW)
-    import torch
-    import whisper
-    
-    # Force single-thread execution for PyTorch
-    torch.set_num_threads(1)
+    # 2. Load Model
+    # cpu_threads=1 is critical for the Free Tier limit
+    model = WhisperModel(model_size, device="cpu", compute_type="int8", cpu_threads=1)
 
-    print(f"⏳ Loading Whisper model: {model_size}...")
-    
-    # 3. Load Model
-    # We use 'cpu' explicitly to avoid looking for GPU drivers (saves RAM)
-    model = whisper.load_model(model_size, device="cpu")
-    
     print("Transcribing audio...")
-    result = model.transcribe(audio_path, word_timestamps=True, fp16=False) # fp16=False is safer for CPU
+    # 3. Transcribe
+    segments, info = model.transcribe(audio_path, word_timestamps=True)
     
-    # 4. CRITICAL: Delete Model from RAM immediately
-    del model
-    del torch
-    gc.collect() 
-    print("🧹 RAM cleared.")
-    
-    # 5. Format Data
+    # 4. Process segments (Faster-Whisper returns a generator, so we iterate now)
     transcription_data = {
-        "full_text": result["text"],
+        "full_text": "",
         "segments": []
     }
 
-    for segment in result["segments"]:
-        for word in segment.get("words", []):
+    full_text_pieces = []
+
+    for segment in segments:
+        full_text_pieces.append(segment.text)
+        for word in segment.words:
             transcription_data["segments"].append({
-                "word": word["word"].strip(),
-                "start": word["start"],
-                "end": word["end"],
-                "confidence": word["probability"]
+                "word": word.word.strip(),
+                "start": word.start,
+                "end": word.end,
+                "confidence": word.probability
             })
+            
+    transcription_data["full_text"] = " ".join(full_text_pieces)
+    
+    # 5. Clean up
+    del model
+    gc.collect() 
+    print("🧹 RAM cleared.")
             
     return transcription_data
