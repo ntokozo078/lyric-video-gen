@@ -1,6 +1,6 @@
 FROM python:3.9-slim
 
-# Install system dependencies (FFmpeg + ImageMagick)
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     imagemagick \
@@ -17,5 +17,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 5000
 
-# Start just the web server (with high timeout so it doesn't kill the render)
-CMD gunicorn --bind 0.0.0.0:$PORT --timeout 120 run:app
+# Start ONLY the web server with a long timeout
+CMD gunicorn --bind 0.0.0.0:$PORT --timeout 300 run:app

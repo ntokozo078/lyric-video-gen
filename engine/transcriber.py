@@ -1,30 +1,22 @@
 import warnings
 import gc
 
-# Suppress warnings
 warnings.filterwarnings("ignore")
 
 def transcribe_audio(audio_path, model_size="tiny"):
-    """
-    Strict Low-Memory version: Imports, runs, and DELETES whisper.
-    """
-    # 1. Local Import (Saves Gunicorn RAM)
+    # IMPORT HERE TO SAVE MEMORY ON STARTUP
     import whisper 
 
     print(f"⏳ Loading Whisper model: {model_size}...")
-    
-    # 2. Load Model
     model = whisper.load_model(model_size)
     
     print("Transcribing audio...")
     result = model.transcribe(audio_path, word_timestamps=True)
     
-    # 3. CRITICAL: Delete Model from RAM immediately
+    # DELETE MODEL IMMEDIATELY TO FREE RAM
     del model
     gc.collect() 
-    print("🧹 RAM cleared.")
     
-    # 4. Format Data
     transcription_data = {
         "full_text": result["text"],
         "segments": []
