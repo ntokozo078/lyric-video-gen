@@ -25,7 +25,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 7. Expose Port
 EXPOSE 5000
 
-# 8. Start the App (Run Redis + Celery + Flask)
+# 8. Start the App
+# CHANGE: We use $PORT instead of hardcoding 5000
 CMD redis-server --daemonize yes && \
     celery -A app.tasks.celery worker --loglevel=info --pool=gevent --concurrency=4 & \
-    gunicorn --bind 0.0.0.0:5000 run:app
+    gunicorn --bind 0.0.0.0:$PORT run:app
