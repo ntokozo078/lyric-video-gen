@@ -3,16 +3,11 @@ import platform
 import math
 from moviepy.config import change_settings
 
-# --- CROSS-PLATFORM CONFIGURATION ---
-# This fixes the "WinError 2" on your laptop AND works on the Cloud.
 if platform.system() == "Windows":
-    # ⚠️ IMPORTANT: Verify this path matches your computer exactly!
-    # Common paths:
-    # r"C:\Program Files\ImageMagick-7.1.3-Q16-HDRI\magick.exe"
-    # r"C:\Program Files\ImageMagick-7.1.2-Q16-HDRI\magick.exe"
+    # PASTE YOUR EXACT PATH HERE
+    # Example: r"C:\Program Files\ImageMagick-7.1.3-Q16-HDRI\magick.exe"
     change_settings({"IMAGEMAGICK_BINARY": r"C:\Program Files\ImageMagick-7.1.3-Q16-HDRI\magick.exe"})
 else:
-    # Linux / Render.com Path
     change_settings({"IMAGEMAGICK_BINARY": "/usr/bin/convert"})
 
 from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip, AudioFileClip
