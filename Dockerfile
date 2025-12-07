@@ -1,21 +1,25 @@
+# 1. Use Python
 FROM python:3.9-slim
 
-# Install system dependencies
+# 2. Install FFmpeg and ImageMagick (System tools)
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     imagemagick \
     && rm -rf /var/lib/apt/lists/*
 
-# Fix ImageMagick policy
+# 3. Fix ImageMagick Policy
 RUN sed -i 's/none/read,write/g' /etc/ImageMagick-*/policy.xml
 
+# 4. Setup App
 WORKDIR /app
 COPY . /app
 
-# Install dependencies
+# 5. Install Python Libs
 RUN pip install --no-cache-dir -r requirements.txt
 
+# 6. Expose Port
 EXPOSE 5000
 
-# Start ONLY the web server with a long timeout
+# 7. Start ONLY the Web Server (No Celery, No Redis)
+# We set timeout to 300s (5 mins) so Render doesn't kill it while processing
 CMD gunicorn --bind 0.0.0.0:$PORT --timeout 300 run:app

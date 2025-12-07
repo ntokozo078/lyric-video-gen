@@ -1,11 +1,8 @@
 import os
 import json
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, jsonify, send_from_directory
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, send_from_directory, current_app
 
-# Helpers
 from app.utils import allowed_file, save_upload
-
-# Engines
 from engine.audio import extract_audio
 from engine.transcriber import transcribe_audio
 from engine.renderer import generate_lyric_video
@@ -23,6 +20,7 @@ def editor(filename):
 @main.route('/upload', methods=['POST'])
 def upload_video():
     if 'video_file' not in request.files:
+        flash('No file part', 'danger')
         return redirect(request.url)
     
     file = request.files['video_file']
@@ -38,8 +36,9 @@ def upload_video():
         # 1. Extract Audio
         extract_audio(video_path, audio_path)
         
-        # 2. Transcribe (Directly)
+        # 2. Transcribe (Synchronous)
         if not os.path.exists(json_path):
+            # Using 'tiny' model to save RAM
             transcription_data = transcribe_audio(audio_path, model_size="tiny")
             with open(json_path, 'w') as f:
                 json.dump(transcription_data, f, indent=4)
@@ -47,7 +46,7 @@ def upload_video():
         return redirect(url_for('main.editor', filename=filename))
         
     except Exception as e:
-        print(f"❌ ERROR: {e}")
+        print(f"❌ UPLOAD ERROR: {e}")
         return redirect(url_for('main.index'))
 
 @main.route('/update-data/<filename>', methods=['POST'])
@@ -78,6 +77,7 @@ def render_video():
         video_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
         audio_path = os.path.join(current_app.config['AUDIO_FOLDER'], f"{base_name}.wav")
         json_path = os.path.join(current_app.config['CACHE_FOLDER'], f"{base_name}.json")
+        
         output_filename = f"render_{style}_{base_name}.mp4"
         output_path = os.path.join(current_app.config['OUTPUT_FOLDER'], output_filename)
 
@@ -90,13 +90,13 @@ def render_video():
             style, position, animation
         )
         
-        # Immediate Download Response
         return jsonify({
             "status": "success",
             "download_url": url_for('main.download_file', filename=output_filename)
         })
 
     except Exception as e:
+        print(f"❌ RENDER ERROR: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
 
 @main.route('/get-data/<filename>')
