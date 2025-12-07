@@ -1,7 +1,7 @@
 # 1. Use Python
 FROM python:3.9-slim
 
-# 2. Install FFmpeg and ImageMagick (System tools)
+# 2. Install FFmpeg and ImageMagick ONLY (No Redis)
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     imagemagick \
@@ -20,6 +20,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 6. Expose Port
 EXPOSE 5000
 
-# 7. Start ONLY the Web Server (No Celery, No Redis)
-# We set timeout to 300s (5 mins) so Render doesn't kill it while processing
-CMD gunicorn --bind 0.0.0.0:$PORT --timeout 300 run:app
+# 7. Start Web Server
+# We restrict Gunicorn to 1 worker to ensure we don't accidentally double memory usage
+CMD gunicorn --bind 0.0.0.0:$PORT --workers 1 --threads 2 --timeout 300 run:app
