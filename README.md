@@ -4,7 +4,7 @@ A lightweight web application that automatically generates lyric videos from vid
 
 **Live Demo:** [https://lyric-video-gen.onrender.com](https://lyric-video-gen.onrender.com) _(Note: Free tier servers spin down after inactivity, so the first load may take 50 seconds)_
 
-![Screenshot](Screenshot 2025-12-07 132713.png) *(Optional: Add a screenshot of your editor interface here)*
+![Screenshot](https://github.com/ntokozo078/lyric-video-gen/blob/main/Screenshot%202025-12-07%20132713.png) 
 
 ## ✨ Features
 
