@@ -5,17 +5,14 @@ import os
 import platform
 from moviepy.config import change_settings
 
-# CROSS-PLATFORM FIX
+# --- CROSS-PLATFORM CONFIG ---
 if platform.system() == "Windows":
-    # YOUR LOCAL WINDOWS PATH
+    # YOUR LOCAL PATH (Verify this file exists!)
     change_settings({"IMAGEMAGICK_BINARY": r"C:\Program Files\ImageMagick-7.1.2-Q16-HDRI\magick.exe"})
 else:
-    # LINUX / CLOUD PATH (Standard Install)
+    # CLOUD PATH
     change_settings({"IMAGEMAGICK_BINARY": "/usr/bin/convert"})
 
-# ... rest of imports ...
-
-import platform
 import math
 from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip, AudioFileClip
 
