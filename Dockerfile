@@ -28,5 +28,5 @@ EXPOSE 5000
 # 8. Start the App
 # CHANGE: Set concurrency to 1 to save RAM. Use $PORT.
 CMD redis-server --daemonize yes && \
-    celery -A app.tasks.celery worker --loglevel=info --pool=gevent --concurrency=1 & \
+    celery -A app.tasks.celery worker --loglevel=info --pool=solo --concurrency=1 & \
     gunicorn --bind 0.0.0.0:$PORT run:app
