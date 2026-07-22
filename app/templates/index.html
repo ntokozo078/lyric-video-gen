@@ -1,42 +1,79 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row justify-content-center mt-5">
-    <div class="col-md-8">
+<div class="row justify-content-center align-items-center" style="min-height: 75vh;">
+    <div class="col-md-8 col-lg-6">
         
-        <div class="text-center mb-5">
-            <h1 class="display-4 fw-bold">Turn Video into <span class="text-primary">Lyrics</span></h1>
-            <p class="lead text-muted">Upload a video, let AI listen, and generate a lyric video in seconds.</p>
+        <div class="text-center mb-5 hover-lift">
+            <h1 class="hero-title mb-3">Turn Video into Lyrics</h1>
+            <p class="fs-5 text-muted">Upload a video, let AI listen, and generate a stunning lyric video in seconds.</p>
         </div>
 
-        <div class="card shadow-lg border-0 rounded-3">
-            <div class="card-body p-5 text-center">
-                
-                <form action="{{ url_for('main.upload_video') }}" method="POST" enctype="multipart/form-data">
+        <div class="glass-panel p-1">
+            <div class="card bg-transparent border-0 rounded-3">
+                <div class="card-body p-4 p-md-5 text-center">
                     
-                    <div class="mb-4">
-                        <i class="fas fa-cloud-upload-alt fa-5x text-secondary mb-3"></i>
-                        <h5>Drag & Drop your video here</h5>
-                        <p class="text-muted small">or click to browse (MP4, MOV)</p>
-                    </div>
+                    <form action="{{ url_for('main.upload_video') }}" method="POST" enctype="multipart/form-data">
+                        
+                        <div class="upload-zone p-5 mb-4 position-relative" onclick="document.getElementById('video_file').click()">
+                            <i class="fas fa-cloud-upload-alt fa-4x text-muted mb-3 upload-icon"></i>
+                            <h4 class="text-white mb-2 fw-semibold">Click to browse or Drag & Drop</h4>
+                            <p class="text-muted small mb-0">Supported formats: MP4, MOV</p>
+                            <!-- Hidden File Input -->
+                            <input class="form-control d-none" type="file" name="video_file" id="video_file" required onchange="updateFileName(this)">
+                        </div>
+                        
+                        <div id="file-name-display" class="text-primary mb-4 fw-medium" style="display: none;"></div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-gradient btn-lg py-3 rounded-pill">
+                                <i class="fas fa-magic me-2"></i> Start Generating
+                            </button>
+                        </div>
+                    </form>
 
-                    <input class="form-control form-control-lg mb-4" type="file" name="video_file" id="video_file" required>
-                    
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="fas fa-magic"></i> Start Processing
-                        </button>
-                    </div>
-                </form>
-
-            </div>
-            <div class="card-footer bg-white border-0 text-center pb-4">
-                <small class="text-muted">
-                    <i class="fas fa-shield-alt"></i> Files are processed locally and deleted after 24 hours.
-                </small>
+                </div>
+                <div class="card-footer bg-transparent border-0 text-center pb-4 pt-0">
+                    <small class="text-muted d-flex justify-content-center align-items-center gap-2">
+                        <i class="fas fa-shield-alt text-success"></i> Files are processed locally and auto-deleted.
+                    </small>
+                </div>
             </div>
         </div>
 
     </div>
 </div>
+
+<script>
+    function updateFileName(input) {
+        const display = document.getElementById('file-name-display');
+        if (input.files && input.files.length > 0) {
+            display.innerHTML = `<i class="fas fa-file-video me-2"></i> ${input.files[0].name}`;
+            display.style.display = 'block';
+        } else {
+            display.style.display = 'none';
+        }
+    }
+    
+    // Simple Drag and Drop styling
+    const zone = document.querySelector('.upload-zone');
+    zone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        zone.style.borderColor = 'var(--primary)';
+        zone.style.background = 'rgba(99, 102, 241, 0.1)';
+    });
+    zone.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        zone.style.borderColor = '';
+        zone.style.background = '';
+    });
+    zone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        zone.style.borderColor = '';
+        zone.style.background = '';
+        const input = document.getElementById('video_file');
+        input.files = e.dataTransfer.files;
+        updateFileName(input);
+    });
+</script>
 {% endblock %}

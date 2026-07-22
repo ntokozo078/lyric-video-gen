@@ -11,6 +11,8 @@ def transcribe_audio(audio_path, model_size="tiny"):
     This runs without PyTorch, using ~200MB RAM instead of ~600MB.
     """
     print(f"⚡ Starting transcription (Faster-Whisper / {model_size})...")
+    # Fix for Windows OpenMP hard crashes (Connection Reset Error)
+    os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
     
     # 1. Local Import to save start-up memory
     from faster_whisper import WhisperModel
