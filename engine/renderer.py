@@ -53,18 +53,22 @@ def generate_lyric_video(video_path, audio_path, transcription_data, output_path
         base_y = h * 0.80 # Bottom 20%
 
     # --- STYLE CONFIGURATION ---
-    font = 'Arial-Bold'
+    is_linux = platform.system() == "Linux"
+    
+    font = 'Liberation-Sans-Bold' if is_linux else 'Arial-Bold'
+    fallback_font = 'Liberation-Sans' if is_linux else 'Arial'
+    
     fontsize = 40 if w < 600 else 60 # Adjust font size for 480p
     color = 'white'
     stroke_color = 'black'
     stroke_width = 2
     
     if style == 'style-ig-glow':
-        font = 'Times-New-Roman-Bold-Italic'
+        font = 'Liberation-Serif-Bold-Italic' if is_linux else 'Times-New-Roman-Bold-Italic'
         stroke_color = '#00d2ff'
         stroke_width = 1
     elif style == 'style-ig-green':
-        font = 'Arial-Black'
+        font = 'Liberation-Sans-Bold' if is_linux else 'Arial-Black'
         color = '#39ff14'
         stroke_width = 0
     elif style == 'style-emoji':
@@ -91,8 +95,8 @@ def generate_lyric_video(video_path, audio_path, transcription_data, output_path
                    .set_start(start)
                    .set_duration(duration))
         except Exception as e:
-            print(f"⚠️ Font Error: {e}. Fallback to Arial.")
-            txt = (TextClip(word, fontsize=fontsize, color='white', font='Arial')
+            print(f"⚠️ Font Error: {e}. Fallback to {fallback_font}.")
+            txt = (TextClip(word, fontsize=fontsize, color='white', font=fallback_font)
                    .set_start(start)
                    .set_duration(duration))
 
