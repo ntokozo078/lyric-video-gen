@@ -85,8 +85,13 @@ def render_video():
         
         output_filename = f"render_{style}_{base_name}.mp4"
         output_path = os.path.join(current_app.config['OUTPUT_FOLDER'], output_filename)
-        
         download_url = url_for('main.download_file', filename=output_filename)
+        
+        if not os.path.exists(json_path) or not os.path.exists(video_path):
+            return jsonify({
+                "status": "error", 
+                "message": "Files missing! Render wipes storage on every code update or sleep. Please go back to the home page and re-upload the video."
+            }), 400
 
         with open(json_path, 'r') as f:
             transcription_data = json.load(f)
