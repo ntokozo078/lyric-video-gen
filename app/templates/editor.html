@@ -127,7 +127,7 @@ document.addEventListener("DOMContentLoaded", function() {
     animSelector.addEventListener("change", updateClasses);
     updateClasses();
 
-    // 4. RENDER BUTTON (Synchronous)
+    // 4. RENDER BUTTON (Asynchronous Polling)
     document.getElementById("render-btn").addEventListener("click", () => {
         const btn = document.getElementById("render-btn");
         const statusText = document.getElementById("progress-status");
@@ -135,7 +135,7 @@ document.addEventListener("DOMContentLoaded", function() {
         btn.disabled = true;
         btn.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i> Processing...`;
         document.getElementById("progress-container").classList.remove("d-none");
-        statusText.innerText = "Rendering... (Please wait, do not close tab)";
+        statusText.innerText = "Starting engine... (Please wait)";
         
         fetch("/render", {
             method: "POST",
@@ -149,18 +149,43 @@ document.addEventListener("DOMContentLoaded", function() {
         })
         .then(res => res.json())
         .then(data => {
-            if (data.status === 'success') {
-                statusText.innerText = "Done! Download starting...";
-                window.location.href = data.download_url;
+            if (data.status === 'processing') {
+                statusText.innerText = "Rendering Video... (This may take a few minutes)";
+                
+                // Poll for status every 3 seconds
+                const pollInterval = setInterval(() => {
+                    fetch(`/render-status/${data.task_id}`)
+                        .then(res => res.json())
+                        .then(statusData => {
+                            if (statusData.status === 'success') {
+                                clearInterval(pollInterval);
+                                statusText.innerText = "Done! Download starting...";
+                                window.location.href = statusData.download_url;
+                                btn.disabled = false;
+                                btn.innerHTML = `<i class="fas fa-file-export me-2"></i> Export Video`;
+                                setTimeout(() => { document.getElementById("progress-container").classList.add("d-none"); }, 3000);
+                            } else if (statusData.status === 'error') {
+                                clearInterval(pollInterval);
+                                alert("Error: " + statusData.message);
+                                btn.disabled = false;
+                                btn.innerHTML = `<i class="fas fa-file-export me-2"></i> Export Video`;
+                                document.getElementById("progress-container").classList.add("d-none");
+                            }
+                        })
+                        .catch(err => {
+                            console.error("Polling error:", err);
+                        });
+                }, 3000);
+
             } else {
-                alert("Error: " + data.message);
+                alert("Error starting render: " + data.message);
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fas fa-file-export me-2"></i> Export Video`;
+                document.getElementById("progress-container").classList.add("d-none");
             }
-            btn.disabled = false;
-            btn.innerHTML = `<i class="fas fa-file-export me-2"></i> Export Video`;
-            setTimeout(() => { document.getElementById("progress-container").classList.add("d-none"); }, 3000);
         })
         .catch(err => {
-            alert("Timeout or Error. Try a shorter video.");
+            alert("Network Error. Could not connect to server.");
             btn.disabled = false;
             btn.innerHTML = `<i class="fas fa-file-export me-2"></i> Export Video`;
             document.getElementById("progress-container").classList.add("d-none");

@@ -1,5 +1,7 @@
 import os
 import json
+import threading
+import uuid
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, send_from_directory, current_app
 
 from app.utils import allowed_file, save_upload
@@ -8,6 +10,9 @@ from engine.transcriber import transcribe_audio
 from engine.renderer import generate_lyric_video
 
 main = Blueprint('main', __name__)
+
+# In-memory task queue for Render free tier
+RENDER_TASKS = {}
 
 @main.route('/')
 def index():
@@ -64,7 +69,7 @@ def update_data(filename):
 @main.route('/render', methods=['POST'])
 def render_video():
     """
-    Synchronous Render: The browser will wait here until it finishes.
+    Asynchronous Render: Starts rendering in background to avoid Render timeout.
     """
     try:
         data = request.json
@@ -80,24 +85,48 @@ def render_video():
         
         output_filename = f"render_{style}_{base_name}.mp4"
         output_path = os.path.join(current_app.config['OUTPUT_FOLDER'], output_filename)
+        
+        download_url = url_for('main.download_file', filename=output_filename)
 
         with open(json_path, 'r') as f:
             transcription_data = json.load(f)
 
-        # DIRECT CALL (Blocking)
-        generate_lyric_video(
-            video_path, audio_path, transcription_data, output_path, 
-            style, position, animation
-        )
+        task_id = str(uuid.uuid4())
+        RENDER_TASKS[task_id] = {"status": "processing"}
+
+        def background_render():
+            try:
+                generate_lyric_video(
+                    video_path, audio_path, transcription_data, output_path, 
+                    style, position, animation
+                )
+                RENDER_TASKS[task_id] = {
+                    "status": "success",
+                    "download_url": download_url
+                }
+            except Exception as e:
+                print(f"❌ BACKGROUND RENDER ERROR: {e}")
+                RENDER_TASKS[task_id] = {"status": "error", "message": str(e)}
+
+        # Start thread
+        thread = threading.Thread(target=background_render)
+        thread.start()
         
         return jsonify({
-            "status": "success",
-            "download_url": url_for('main.download_file', filename=output_filename)
+            "status": "processing",
+            "task_id": task_id
         })
 
     except Exception as e:
         print(f"❌ RENDER ERROR: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
+
+@main.route('/render-status/<task_id>')
+def render_status(task_id):
+    task = RENDER_TASKS.get(task_id)
+    if not task:
+        return jsonify({"status": "error", "message": "Task not found"}), 404
+    return jsonify(task)
 
 @main.route('/get-data/<filename>')
 def get_data(filename):
